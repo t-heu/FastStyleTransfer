@@ -49,6 +49,12 @@ Ou tudo em uma linha:
 python -m pip install tensorflow==1.15 numpy scipy imageio pillow moviepy
 ```
 
+Use um datataset de imagens pronto para treinar contem +80k de fotos.
+
+```bash
+./setup.sh
+```
+
 ---
 
 ## 📁 Estrutura esperada do projeto
