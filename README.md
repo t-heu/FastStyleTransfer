@@ -57,32 +57,6 @@ Use um datataset de imagens pronto para treinar contem +80k de fotos.
 
 ---
 
-## 📁 Estrutura esperada do projeto
-
-```
-fast-style-transfer/
-├── style.py
-├── evaluate.py
-├── checkpoints/
-│   └── ghibli_model/
-├── styles/
-│   └── ghibli.png
-├── content/
-│   └── dog.jpg
-├── results/
-│   └── output.png
-├── train_data/
-│   └── (imagens de treino)
-├── src/
-│   ├── optimize.py
-│   ├── vgg.py
-│   ├── transform.py
-│   ├── utils.py
-│   └── evaluate.py
-```
-
----
-
 ## 🚀 Como usar
 
 ### 🔧 Etapa 1 — Treinamento

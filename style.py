@@ -1,11 +1,11 @@
-from __future__ import print_function
-import sys, os, pdb
-sys.path.insert(0, 'src')
-import numpy as np, scipy.misc 
-from optimize import optimize
-from argparse import ArgumentParser
-from utils import save_img, get_img, exists, list_files
+import argparse
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+from src.utils import save_img, get_img, exists, list_files
+import numpy as np
 import evaluate
+from optimize import optimize
 
 CONTENT_WEIGHT = 7.5e0
 STYLE_WEIGHT = 1e2
@@ -16,13 +16,11 @@ NUM_EPOCHS = 2
 CHECKPOINT_DIR = 'checkpoints'
 CHECKPOINT_ITERATIONS = 2000
 VGG_PATH = 'data/imagenet-vgg-verydeep-19.mat'
-TRAIN_PATH = 'data/train2014'
+TRAIN_PATH = 'data/train500'  # 'data/train2014'
 BATCH_SIZE = 4
-DEVICE = '/gpu:0'
-FRAC_GPU = 1
 
 def build_parser():
-    parser = ArgumentParser()
+    parser = argparse.ArgumentParser()
     parser.add_argument('--checkpoint-dir', type=str,
                         dest='checkpoint_dir', help='dir to save checkpoint in',
                         metavar='CHECKPOINT_DIR', required=True)
@@ -37,14 +35,14 @@ def build_parser():
 
     parser.add_argument('--test', type=str,
                         dest='test', help='test image path',
-                        metavar='TEST', default=False)
+                        metavar='TEST', default=None)
 
     parser.add_argument('--test-dir', type=str,
                         dest='test_dir', help='test image save dir',
-                        metavar='TEST_DIR', default=False)
+                        metavar='TEST_DIR', default=None)
 
     parser.add_argument('--slow', dest='slow', action='store_true',
-                        help='gatys\' approach (for debugging, not supported)',
+                        help='gatys approach (for debugging, not supported)',
                         default=False)
 
     parser.add_argument('--epochs', type=int,
@@ -62,27 +60,27 @@ def build_parser():
 
     parser.add_argument('--vgg-path', type=str,
                         dest='vgg_path',
-                        help='path to VGG19 network (default %(default)s)',
+                        help='path to VGG19 network',
                         metavar='VGG_PATH', default=VGG_PATH)
 
     parser.add_argument('--content-weight', type=float,
                         dest='content_weight',
-                        help='content weight (default %(default)s)',
+                        help='content weight',
                         metavar='CONTENT_WEIGHT', default=CONTENT_WEIGHT)
-    
+
     parser.add_argument('--style-weight', type=float,
                         dest='style_weight',
-                        help='style weight (default %(default)s)',
+                        help='style weight',
                         metavar='STYLE_WEIGHT', default=STYLE_WEIGHT)
 
     parser.add_argument('--tv-weight', type=float,
                         dest='tv_weight',
-                        help='total variation regularization weight (default %(default)s)',
+                        help='total variation regularization weight',
                         metavar='TV_WEIGHT', default=TV_WEIGHT)
-    
+
     parser.add_argument('--learning-rate', type=float,
                         dest='learning_rate',
-                        help='learning rate (default %(default)s)',
+                        help='learning rate',
                         metavar='LEARNING_RATE', default=LEARNING_RATE)
 
     return parser
@@ -106,9 +104,8 @@ def check_opts(opts):
 
 def _get_files(img_dir):
     files = list_files(img_dir)
-    return [os.path.join(img_dir,x) for x in files]
+    return [os.path.join(img_dir, x) for x in files]
 
-    
 def main():
     parser = build_parser()
     options = parser.parse_args()
@@ -119,14 +116,16 @@ def main():
         content_targets = _get_files(options.train_path)
     elif options.test:
         content_targets = [options.test]
+    else:
+        content_targets = []
 
     kwargs = {
-        "slow":options.slow,
-        "epochs":options.epochs,
-        "print_iterations":options.checkpoint_iterations,
-        "batch_size":options.batch_size,
-        "save_path":os.path.join(options.checkpoint_dir,'fns.ckpt'),
-        "learning_rate":options.learning_rate
+        "slow": options.slow,
+        "epochs": options.epochs,
+        "print_iterations": options.checkpoint_iterations,
+        "batch_size": options.batch_size,
+        "save_path": os.path.join(options.checkpoint_dir, 'fns.ckpt'),
+        "learning_rate": options.learning_rate
     }
 
     if options.slow:
@@ -147,21 +146,24 @@ def main():
     for preds, losses, i, epoch in optimize(*args, **kwargs):
         style_loss, content_loss, tv_loss, loss = losses
 
-        print('Epoch %d, Iteration: %d, Loss: %s' % (epoch, i, loss))
-        to_print = (style_loss, content_loss, tv_loss)
-        print('style: %s, content:%s, tv: %s' % to_print)
-        if options.test:
-            assert options.test_dir != False
-            preds_path = '%s/%s_%s.png' % (options.test_dir,epoch,i)
+        print(f'Epoch {epoch}, Iteration: {i}, Loss: {loss:.6f}')
+        total_batches = len(content_targets) // options.batch_size
+        total_steps = total_batches * options.epochs
+        current_step = epoch * total_batches + i
+        progress = (current_step / total_steps) * 100
+        print(f"[PROGRESS] {current_step}/{total_steps} steps — {progress:.2f}% done\n")
+
+        if options.test and options.test_dir:
+            preds_path = f'{options.test_dir}/{epoch}_{i}.png'
             if not options.slow:
-                ckpt_dir = os.path.dirname(options.checkpoint_dir)
-                evaluate.ffwd_to_img(options.test,preds_path,
-                                     options.checkpoint_dir)
+                evaluate.ffwd_to_img(options.test, preds_path, options.checkpoint_dir)
             else:
-                save_img(preds_path, img)
-    ckpt_dir = options.checkpoint_dir
-    cmd_text = 'python evaluate.py --checkpoint %s ...' % ckpt_dir
-    print("Training complete. For evaluation:\n    `%s`" % cmd_text)
+                save_img(preds_path, preds)
+
+    print("\n✅ Training finished successfully!")
+    print(f"📍Model saved in: {options.checkpoint_dir}")
+    print(f"📸 To test, run: python evaluate.py --checkpoint {options.checkpoint_dir} --in-path test_images --out-path results")
+
 
 if __name__ == '__main__':
     main()
