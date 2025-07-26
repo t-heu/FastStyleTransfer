@@ -16,7 +16,7 @@ NUM_EPOCHS = 2
 CHECKPOINT_DIR = 'checkpoints'
 CHECKPOINT_ITERATIONS = 2000
 VGG_PATH = 'data/imagenet-vgg-verydeep-19.mat'
-TRAIN_PATH = 'data/train2014'  # 'data/train2014'
+TRAIN_PATH = 'data/train2014/train2014'  # 'data/train2014'
 BATCH_SIZE = 4
 
 def build_parser():

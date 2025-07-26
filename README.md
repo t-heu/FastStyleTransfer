@@ -84,9 +84,10 @@ python evaluate.py --checkpoint checkpoints/ghibli_model --in-path content/dog.j
 ---
 ## 🖼️ Exemplo: Antes e Depois
 
-| 📷 **Imagem Original**     | 🎨 **Após Transferência de Estilo (Ghibli)** |
-| -------------------------- | -------------------------------------------- |
-| ![before](content/dog.jpg) | ![after](results/saida_estilizada.png)                 |
+| 📷 **Original**                  | 🧾 **Estilo**                | 🎨 **Resultado (Ghibli)**  |
+| -------------------------------- | ---------------------------- | -------------------------- |
+| ![original](content/dog.jpg)     | ![style](styles/ghibli.png) | ![after](docs/output2.png) |
+| ![original](content/chicago.jpg) | ![style](styles/ghibli.png) | ![after](docs/output.png)  |
 
 > A imagem original (à esquerda) é estilizada com a imagem do estilo `ghibli.png`, resultando na imagem à direita.
 
@@ -95,6 +96,10 @@ python evaluate.py --checkpoint checkpoints/ghibli_model --in-path content/dog.j
 * Se ocorrer erro com `scipy.misc`, edite o código e substitua por `imageio` e `Pillow`.
 * O projeto foi feito para TensorFlow **1.x** e pode não funcionar corretamente com TensorFlow 2.x ou Python > 3.10.
 * Certifique-se de que os arquivos `.py` estejam na pasta `src/` conforme a estrutura acima.
+
+## Usando Google Colab
+![style](docs/aa.png)
+Use de exemplo arquivo `exe.ipynb`
 
 ---
 
