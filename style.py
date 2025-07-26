@@ -7,17 +7,17 @@ import numpy as np
 import evaluate
 from optimize import optimize
 
-CONTENT_WEIGHT = 7.5e0
-STYLE_WEIGHT = 1e2
-TV_WEIGHT = 2e2
+CONTENT_WEIGHT = 1e1
+STYLE_WEIGHT = 1e4
+TV_WEIGHT = 1e-6
 
-LEARNING_RATE = 1e-3
-NUM_EPOCHS = 2
+LEARNING_RATE = 5e-4
+NUM_EPOCHS = 10
 CHECKPOINT_DIR = 'checkpoints'
 CHECKPOINT_ITERATIONS = 2000
 VGG_PATH = 'data/imagenet-vgg-verydeep-19.mat'
-TRAIN_PATH = 'data/train2014/train2014'  # 'data/train2014'
-BATCH_SIZE = 4
+TRAIN_PATH = 'data/train2014'  # 'data/train2014'
+BATCH_SIZE = 8
 
 def build_parser():
     parser = argparse.ArgumentParser()

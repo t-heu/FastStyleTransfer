@@ -118,7 +118,7 @@ def optimize(content_targets, style_target, content_weight, style_weight,
 
                 current_step = epoch * total_batches + iterations
                 progress = (current_step / total_steps) * 100
-                print(f"[{current_step}/{total_steps}] {progress:.2f}% concluído")
+                print(f"\rProgresso: [{current_step}/{total_steps}] {progress:.2f}%", end="", flush=True)
 
                 is_print_iter = iterations % print_iterations == 0
                 is_last = epoch == epochs - 1 and iterations * batch_size >= len(content_targets)
